@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Sabemi.Payment.Api.Background;
 using Sabemi.Payment.Api.Middleware;
 using Sabemi.Payment.Api.Security;
 using Sabemi.Payment.Application.Abstractions;
@@ -33,7 +34,9 @@ builder.Services.AddScoped<IPaymentEventRepository, PaymentEventRepository>();
 builder.Services.AddScoped<IContractStatusRepository, ContractStatusRepository>();
 builder.Services.AddScoped<PaymentWebhookService>();
 builder.Services.AddScoped<PaymentQueryService>();
+builder.Services.AddScoped<PaymentProcessor>();
 builder.Services.AddScoped<PaymentWebhookValidator>();
+builder.Services.AddHostedService<PaymentProcessingWorker>();
 
 var app = builder.Build();
 
