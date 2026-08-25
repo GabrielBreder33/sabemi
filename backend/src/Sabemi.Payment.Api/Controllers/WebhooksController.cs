@@ -15,10 +15,18 @@ public sealed class WebhooksController(PaymentWebhookService paymentWebhookServi
         Request.EnableBuffering();
         using var reader = new StreamReader(Request.Body);
         var rawPayload = await reader.ReadToEndAsync(cancellationToken);
-        var request = JsonSerializer.Deserialize<PaymentWebhookRequest>(rawPayload, new JsonSerializerOptions
+        PaymentWebhookRequest? request;
+        try
         {
-            PropertyNameCaseInsensitive = true
-        });
+            request = JsonSerializer.Deserialize<PaymentWebhookRequest>(rawPayload, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch (JsonException)
+        {
+            return BadRequest(new { title = "Invalid JSON", status = 400 });
+        }
 
         if (request is null)
         {

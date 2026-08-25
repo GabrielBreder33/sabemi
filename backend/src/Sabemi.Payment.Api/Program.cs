@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Sabemi.Payment.Api.Background;
 using Sabemi.Payment.Api.Middleware;
@@ -22,7 +23,26 @@ var connectionString = builder.Configuration.GetConnectionString("Payments")
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.ApiKey,
+        Name = "X-Api-Key",
+        In = ParameterLocation.Header,
+        Description = "Chave configurada em Webhook:ApiKey."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddDbContext<PaymentDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddHealthChecks().AddNpgSql(connectionString);
 builder.Services.AddCors(options => options.AddPolicy("local-frontend", policy => policy
