@@ -1,0 +1,6 @@
+@Sabemi.Payment.Api_HostAddress = http://localhost:5242
+
+GET {{Sabemi.Payment.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
