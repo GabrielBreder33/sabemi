@@ -1,11 +1,8 @@
+import { DashboardPage } from './pages/DashboardPage'
 import './App.css'
 
 function App() {
-  return (
-    <main>
-      <h1>Pagamentos</h1>
-    </main>
-  )
+  return <DashboardPage />
 }
 
 export default App
