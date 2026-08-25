@@ -15,6 +15,7 @@ describe('DashboardPage', () => {
   it('shows empty state when no payments match filters', () => {
     render(<DashboardPage />)
 
+    expect(screen.getByRole('heading', { name: /visão geral/i })).toBeInTheDocument()
     expect(screen.getByText('Nenhum pagamento encontrado')).toBeInTheDocument()
   })
 })

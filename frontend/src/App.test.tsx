@@ -7,6 +7,6 @@ describe('App', () => {
   it('renders the payment dashboard shell', () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: /pagamentos/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /visão geral/i })).toBeInTheDocument()
   })
 })

@@ -11,6 +11,7 @@ export function PaymentFilters({ value, onChange }: Props) {
 
   return (
     <form className="filters" onSubmit={(event) => { event.preventDefault(); onChange(draft) }}>
+      <p className="filter-heading">Filtrar movimentações</p>
       <label>
         Contrato
         <input aria-label="Contrato" value={draft.contractId} onChange={(event) => setDraft({ ...draft, contractId: event.target.value })} placeholder="CTR-987654" />

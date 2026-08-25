@@ -9,5 +9,5 @@ const labels: Record<string, { label: string; title: string }> = {
 
 export function StatusBadge({ value }: { value: string }) {
   const status = labels[value] ?? { label: value, title: value }
-  return <span className={`status-badge status-${value.toLowerCase()}`} role="status" title={status.title}>{status.label}</span>
+  return <span className={`status-badge status-${value.toLowerCase()}`} role="status" title={status.title}><span aria-hidden="true" />{status.label}</span>
 }
