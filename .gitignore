@@ -1,0 +1,18 @@
+.worktrees/
+
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Local configuration and test artifacts
+.env
+*.log
+TestResults/
+coverage/
