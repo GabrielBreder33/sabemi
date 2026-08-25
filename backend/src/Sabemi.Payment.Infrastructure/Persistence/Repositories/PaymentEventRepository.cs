@@ -73,7 +73,18 @@ public sealed class PaymentEventRepository(PaymentDbContext dbContext) : IPaymen
     public async Task CompleteAsync(PaymentEvent paymentEvent, ContractStatus? contractStatus, CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        if (contractStatus is not null) dbContext.ContractStatuses.Update(contractStatus);
+        if (contractStatus is not null)
+        {
+            var existingStatus = await dbContext.ContractStatuses.FindAsync([contractStatus.ContractId], cancellationToken);
+            if (existingStatus is null)
+            {
+                dbContext.ContractStatuses.Add(contractStatus);
+            }
+            else if (!ReferenceEquals(existingStatus, contractStatus))
+            {
+                dbContext.ContractStatuses.Update(contractStatus);
+            }
+        }
         dbContext.PaymentEvents.Update(paymentEvent);
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
