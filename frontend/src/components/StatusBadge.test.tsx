@@ -15,4 +15,11 @@ describe('StatusBadge', () => {
 
     expect(screen.getByText('Processado')).toBeInTheDocument()
   })
+
+  it('shows validation failures with a clear label', () => {
+    render(<StatusBadge value="ValidationFailed" />)
+
+    expect(screen.getByText('Falha de validação')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveAttribute('title', 'Falha de validação do webhook')
+  })
 })

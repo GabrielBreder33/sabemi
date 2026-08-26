@@ -25,7 +25,7 @@
 - Modify: `backend/src/Sabemi.Payment.Application/Abstractions/IPaymentEventRepository.cs`
 - Modify: `backend/src/Sabemi.Payment.Infrastructure/Persistence/Configurations/PaymentEventConfiguration.cs`
 - Modify: `backend/src/Sabemi.Payment.Infrastructure/Persistence/Repositories/PaymentEventRepository.cs`
-- Create: `backend/src/Sabemi.Payment.Infrastructure/Persistence/Migrations/20260826103000_AllowInvalidWebhookEvents.cs`
+- Create: `backend/src/Sabemi.Payment.Infrastructure/Persistence/Migrations/20260826134104_AllowInvalidWebhookEvents.cs`
 - Test: `backend/tests/Sabemi.Payment.UnitTests/Application/PaymentWebhookServiceTests.cs`
 
 **Interfaces:**

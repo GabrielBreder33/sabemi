@@ -1,5 +1,5 @@
 export type PaymentStatus = '' | 'Sucesso' | 'Erro'
-export type ProcessingStatus = '' | 'Pending' | 'Processing' | 'Processed' | 'Failed'
+export type ProcessingStatus = '' | 'Pending' | 'Processing' | 'Processed' | 'Failed' | 'ValidationFailed'
 
 export interface PaymentFilters {
   contractId: string
@@ -9,11 +9,11 @@ export interface PaymentFilters {
 
 export interface PaymentItem {
   id: string
-  transactionId: string
-  contractId: string
-  amount: number
-  paymentDate: string
-  paymentStatus: Exclude<PaymentStatus, ''>
+  transactionId: string | null
+  contractId: string | null
+  amount: number | null
+  paymentDate: string | null
+  paymentStatus: Exclude<PaymentStatus, ''> | null
   processingStatus: Exclude<ProcessingStatus, ''>
   receivedAt: string
   processedAt: string | null

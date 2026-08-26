@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using Npgsql;
 
 namespace Sabemi.Payment.IntegrationTests;
@@ -43,6 +44,22 @@ public sealed class PaymentWebhookConcurrencyTests : IClassFixture<PaymentApiFac
         var response = await _factory.CreateClient().SendAsync(request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Invalid_json_is_rejected_but_recorded_for_dashboard()
+    {
+        var rawPayload = "{invalid-json";
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/webhooks/pagamento")
+        {
+            Content = new StringContent(rawPayload, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("X-Api-Key", PaymentApiFactory.ApiKey);
+
+        var response = await _factory.CreateClient().SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(1, await CountValidationFailuresAsync(rawPayload));
     }
 
     [Fact]
@@ -93,5 +110,14 @@ public sealed class PaymentWebhookConcurrencyTests : IClassFixture<PaymentApiFac
         await using var command = new NpgsqlCommand("SELECT \"ProcessingStatus\" FROM \"PaymentEvents\" WHERE \"TransactionId\" = @transactionId", connection);
         command.Parameters.AddWithValue("transactionId", transactionId);
         return (string?)await command.ExecuteScalarAsync();
+    }
+
+    private async Task<int> CountValidationFailuresAsync(string rawPayload)
+    {
+        await using var connection = new NpgsqlConnection(_factory.ConnectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT COUNT(*) FROM \"PaymentEvents\" WHERE \"ProcessingStatus\" = 'ValidationFailed' AND \"RawPayload\" = @rawPayload", connection);
+        command.Parameters.AddWithValue("rawPayload", rawPayload);
+        return Convert.ToInt32(await command.ExecuteScalarAsync());
     }
 }

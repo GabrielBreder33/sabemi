@@ -81,6 +81,8 @@ curl -X POST http://localhost:8080/webhooks/pagamento \
 
 A resposta esperada é `202 Accepted`. O endpoint persiste o evento como `Pending` e não espera os aproximadamente dois segundos da regra de negócio.
 
+Payloads com JSON inválido ou campos inválidos são preservados em `PaymentEvents` como `ValidationFailed` e respondem `400`. Esses eventos aparecem no painel com alerta visual e não são enviados ao worker de processamento.
+
 A chave vem de `WEBHOOK_API_KEY` no `.env` e é exposta à API como `Webhook__ApiKey`. Nunca use uma chave real no arquivo de exemplo.
 
 ## Idempotência e concorrência
@@ -97,6 +99,7 @@ O contrato só é atualizado se o `data_pagamento` do evento for mais recente qu
 GET /api/pagamentos?page=1&pageSize=20
 GET /api/pagamentos?status=Sucesso&contratoId=CTR-987654
 GET /api/pagamentos?processingStatus=Failed
+GET /api/pagamentos?processingStatus=ValidationFailed
 GET /api/pagamentos/{transactionId}
 GET /api/contratos/{contractId}
 GET /health

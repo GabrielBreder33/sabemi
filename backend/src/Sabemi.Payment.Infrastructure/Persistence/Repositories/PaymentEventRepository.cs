@@ -11,6 +11,16 @@ public sealed class PaymentEventRepository(PaymentDbContext dbContext) : IPaymen
 {
     public async Task<AddPaymentEventResult> AddPendingAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken)
     {
+        return await AddAsync(paymentEvent, cancellationToken);
+    }
+
+    public async Task<AddPaymentEventResult> AddInvalidAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken)
+    {
+        return await AddAsync(paymentEvent, cancellationToken);
+    }
+
+    private async Task<AddPaymentEventResult> AddAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken)
+    {
         dbContext.PaymentEvents.Add(paymentEvent);
 
         try
@@ -21,7 +31,9 @@ public sealed class PaymentEventRepository(PaymentDbContext dbContext) : IPaymen
         catch (DbUpdateException exception) when (IsUniqueViolation(exception))
         {
             dbContext.Entry(paymentEvent).State = EntityState.Detached;
-            var existing = await GetByTransactionIdAsync(paymentEvent.TransactionId, cancellationToken);
+            var existing = paymentEvent.TransactionId is null
+                ? null
+                : await GetByTransactionIdAsync(paymentEvent.TransactionId, cancellationToken);
             return new AddPaymentEventResult(
                 existing ?? throw new InvalidOperationException("The duplicate payment event could not be loaded."),
                 true);

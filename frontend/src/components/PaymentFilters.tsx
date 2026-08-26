@@ -32,6 +32,7 @@ export function PaymentFilters({ value, onChange }: Props) {
           <option value="Processing">Processando</option>
           <option value="Processed">Processado</option>
           <option value="Failed">Erro</option>
+          <option value="ValidationFailed">Falha de validação</option>
         </select>
       </label>
       <button type="submit">Filtrar</button>

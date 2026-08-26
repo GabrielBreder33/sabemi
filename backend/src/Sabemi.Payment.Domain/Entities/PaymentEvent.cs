@@ -9,11 +9,11 @@ public sealed class PaymentEvent
     }
 
     public Guid Id { get; private set; }
-    public string TransactionId { get; private set; } = string.Empty;
-    public string ContractId { get; private set; } = string.Empty;
-    public decimal Amount { get; private set; }
-    public DateTimeOffset PaymentDate { get; private set; }
-    public PaymentStatus PaymentStatus { get; private set; }
+    public string? TransactionId { get; private set; }
+    public string? ContractId { get; private set; }
+    public decimal? Amount { get; private set; }
+    public DateTimeOffset? PaymentDate { get; private set; }
+    public PaymentStatus? PaymentStatus { get; private set; }
     public string RawPayload { get; private set; } = string.Empty;
     public DateTimeOffset ReceivedAt { get; private set; }
     public ProcessingStatus ProcessingStatus { get; private set; }
@@ -47,6 +47,34 @@ public sealed class PaymentEvent
             ProcessingStatus = ProcessingStatus.Pending,
             AttemptCount = 0
         };
+    }
+
+    public static PaymentEvent CreateValidationFailed(
+        string rawPayload,
+        string errorMessage,
+        string? transactionId,
+        string? contractId)
+    {
+        if (rawPayload is null) throw new ArgumentNullException(nameof(rawPayload));
+        if (string.IsNullOrWhiteSpace(errorMessage)) throw new ArgumentException("ErrorMessage is required.", nameof(errorMessage));
+
+        return new PaymentEvent
+        {
+            Id = Guid.NewGuid(),
+            TransactionId = NormalizeIdentifier(transactionId),
+            ContractId = NormalizeIdentifier(contractId),
+            RawPayload = rawPayload,
+            ReceivedAt = DateTimeOffset.UtcNow,
+            ProcessingStatus = ProcessingStatus.ValidationFailed,
+            ErrorMessage = errorMessage[..Math.Min(errorMessage.Length, 2000)],
+            AttemptCount = 0
+        };
+    }
+
+    private static string? NormalizeIdentifier(string? value)
+    {
+        var normalized = value?.Trim();
+        return string.IsNullOrWhiteSpace(normalized) || normalized.Length > 100 ? null : normalized;
     }
 
     public void MarkProcessing()

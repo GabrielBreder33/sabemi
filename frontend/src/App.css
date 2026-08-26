@@ -528,6 +528,7 @@ tbody tr:hover {
 }
 
 .status-failed,
+.status-validationfailed,
 .status-erro {
   color: var(--danger);
   background: var(--danger-soft);
@@ -539,6 +540,13 @@ tbody tr:hover {
   overflow: hidden;
   color: var(--danger);
   text-overflow: ellipsis;
+}
+
+.validation-alert {
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: var(--danger-soft);
+  font-weight: 750;
 }
 
 .state-message {

@@ -16,17 +16,24 @@ public sealed class PaymentProcessor(
         try
         {
             await Task.Delay(_processingDelay, cancellationToken);
-            var currentStatus = await contractStatusRepository.GetAsync(paymentEvent.ContractId, cancellationToken);
+            var currentStatus = paymentEvent.ContractId is null
+                ? null
+                : await contractStatusRepository.GetAsync(paymentEvent.ContractId, cancellationToken);
             ContractStatus? updatedStatus = null;
 
-            if (ContractStatusRules.ShouldApply(paymentEvent, currentStatus))
+            if (paymentEvent.ContractId is not null &&
+                paymentEvent.TransactionId is not null &&
+                paymentEvent.PaymentStatus is not null &&
+                paymentEvent.Amount is not null &&
+                paymentEvent.PaymentDate is not null &&
+                ContractStatusRules.ShouldApply(paymentEvent, currentStatus))
             {
                 updatedStatus = currentStatus ?? ContractStatus.Create(
                     paymentEvent.ContractId,
                     paymentEvent.TransactionId,
-                    paymentEvent.PaymentStatus,
-                    paymentEvent.Amount,
-                    paymentEvent.PaymentDate);
+                    paymentEvent.PaymentStatus.Value,
+                    paymentEvent.Amount.Value,
+                    paymentEvent.PaymentDate.Value);
 
                 if (currentStatus is not null)
                 {

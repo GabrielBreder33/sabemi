@@ -37,4 +37,16 @@ public sealed class PaymentWebhookService(
         var result = await paymentEventRepository.AddPendingAsync(paymentEvent, cancellationToken);
         return new ReceivePaymentResult(result.Event, result.IsDuplicate);
     }
+
+    public async Task<ReceivePaymentResult> RecordInvalidAsync(
+        string rawPayload,
+        string errorMessage,
+        string? transactionId,
+        string? contractId,
+        CancellationToken cancellationToken)
+    {
+        var paymentEvent = PaymentEvent.CreateValidationFailed(rawPayload, errorMessage, transactionId, contractId);
+        var result = await paymentEventRepository.AddInvalidAsync(paymentEvent, cancellationToken);
+        return new ReceivePaymentResult(result.Event, result.IsDuplicate);
+    }
 }

@@ -53,6 +53,25 @@ public sealed class PaymentWebhookServiceTests
         Assert.Equal(0, repository.InsertCount);
     }
 
+    [Fact]
+    public async Task Invalid_payload_is_persisted_as_validation_failed()
+    {
+        var repository = new InMemoryPaymentEventRepository();
+        var service = new PaymentWebhookService(repository);
+
+        var result = await service.RecordInvalidAsync(
+            "{invalid-json",
+            "Invalid JSON.",
+            null,
+            null,
+            CancellationToken.None);
+
+        Assert.Equal(ProcessingStatus.ValidationFailed, result.Event.ProcessingStatus);
+        Assert.Equal("{invalid-json", result.Event.RawPayload);
+        Assert.Equal("Invalid JSON.", result.Event.ErrorMessage);
+        Assert.Equal(1, repository.InsertCount);
+    }
+
     private sealed class InMemoryPaymentEventRepository : IPaymentEventRepository
     {
         private readonly List<PaymentEvent> _events = [];
@@ -62,6 +81,13 @@ public sealed class PaymentWebhookServiceTests
         {
             var existing = _events.SingleOrDefault(item => item.TransactionId == paymentEvent.TransactionId);
             if (existing is not null) return Task.FromResult(new AddPaymentEventResult(existing, true));
+            _events.Add(paymentEvent);
+            InsertCount++;
+            return Task.FromResult(new AddPaymentEventResult(paymentEvent, false));
+        }
+
+        public Task<AddPaymentEventResult> AddInvalidAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken)
+        {
             _events.Add(paymentEvent);
             InsertCount++;
             return Task.FromResult(new AddPaymentEventResult(paymentEvent, false));

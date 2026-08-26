@@ -11,7 +11,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(1)
   const { data, isLoading, error, refresh } = usePayments(filters, page)
   const processed = data.items.filter((item) => item.processingStatus === 'Processed').length
-  const failed = data.items.filter((item) => item.processingStatus === 'Failed').length
+  const failed = data.items.filter((item) => item.processingStatus === 'Failed' || item.processingStatus === 'ValidationFailed').length
   const pending = data.items.filter((item) => item.processingStatus === 'Pending' || item.processingStatus === 'Processing').length
 
   const handleFilters = (nextFilters: Filters) => {

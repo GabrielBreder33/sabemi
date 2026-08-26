@@ -35,10 +35,18 @@ public sealed class ContractStatus
 
     public void Apply(PaymentEvent paymentEvent)
     {
+        if (paymentEvent.TransactionId is null ||
+            paymentEvent.PaymentStatus is null ||
+            paymentEvent.Amount is null ||
+            paymentEvent.PaymentDate is null)
+        {
+            throw new InvalidOperationException("Only valid payment events can update contract status.");
+        }
+
         LastTransactionId = paymentEvent.TransactionId;
-        PaymentStatus = paymentEvent.PaymentStatus;
-        PaymentValue = paymentEvent.Amount;
-        PaymentDate = paymentEvent.PaymentDate;
+        PaymentStatus = paymentEvent.PaymentStatus.Value;
+        PaymentValue = paymentEvent.Amount.Value;
+        PaymentDate = paymentEvent.PaymentDate.Value;
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

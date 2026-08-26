@@ -16,13 +16,13 @@ export function PaymentTable({ items, isLoading }: { items: PaymentItem[]; isLoa
         <tbody>
           {items.map((item) => (
             <tr key={item.id}>
-              <td className="transaction-cell"><code>{item.transactionId}</code></td>
-              <td className="contract-cell">{item.contractId}</td>
-              <td className="money-cell">{currency.format(item.amount)}</td>
-              <td className="date-cell">{date.format(new Date(item.paymentDate))}</td>
+              <td className="transaction-cell"><code>{item.transactionId ?? '—'}</code></td>
+              <td className="contract-cell">{item.contractId ?? '—'}</td>
+              <td className="money-cell">{item.amount === null ? '—' : currency.format(item.amount)}</td>
+              <td className="date-cell">{item.paymentDate === null ? '—' : date.format(new Date(item.paymentDate))}</td>
               <td><StatusBadge value={item.paymentStatus} /></td>
               <td><StatusBadge value={item.processingStatus} /></td>
-              <td>{item.errorMessage ? <span className="error-detail" title={item.errorMessage}>{item.errorMessage}</span> : '—'}</td>
+              <td>{item.errorMessage ? <span className={`error-detail${item.processingStatus === 'ValidationFailed' ? ' validation-alert' : ''}`} role={item.processingStatus === 'ValidationFailed' ? 'alert' : undefined} title={item.errorMessage}>{item.errorMessage}</span> : '—'}</td>
             </tr>
           ))}
         </tbody>

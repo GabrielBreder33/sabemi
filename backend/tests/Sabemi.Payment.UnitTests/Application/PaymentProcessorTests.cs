@@ -68,6 +68,7 @@ public sealed class PaymentProcessorTests
         public PaymentEvent? FailedEvent { get; private set; }
 
         public Task<AddPaymentEventResult> AddPendingAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<AddPaymentEventResult> AddInvalidAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<PaymentEvent?> GetByTransactionIdAsync(string transactionId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<IReadOnlyList<PaymentEvent>> ClaimPendingAsync(int batchSize, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<PagedPaymentEvents> QueryAsync(PaymentQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();

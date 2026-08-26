@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Sabemi.Payment.Application.Contracts;
 using Sabemi.Payment.Application.Services;
@@ -25,20 +26,46 @@ public sealed class WebhooksController(PaymentWebhookService paymentWebhookServi
         }
         catch (JsonException)
         {
+            await paymentWebhookService.RecordInvalidAsync(rawPayload, "Invalid JSON.", null, null, cancellationToken);
             return BadRequest(new { title = "Invalid JSON", status = 400 });
         }
 
         if (request is null)
         {
+            await paymentWebhookService.RecordInvalidAsync(rawPayload, "Invalid JSON.", null, null, cancellationToken);
             return BadRequest(new { title = "Invalid JSON", status = 400 });
         }
 
-        var result = await paymentWebhookService.ReceiveAsync(request, rawPayload, cancellationToken);
-        return Accepted(new
+        try
         {
-            transactionId = result.Event.TransactionId,
-            processingStatus = result.Event.ProcessingStatus.ToString(),
-            duplicate = result.Duplicate
-        });
+            var result = await paymentWebhookService.ReceiveAsync(request, rawPayload, cancellationToken);
+            return Accepted(new
+            {
+                transactionId = result.Event.TransactionId,
+                processingStatus = result.Event.ProcessingStatus.ToString(),
+                duplicate = result.Duplicate
+            });
+        }
+        catch (ValidationException exception)
+        {
+            var errorMessage = string.Join("; ", exception.Errors.Select(error => $"{error.PropertyName}: {error.ErrorMessage}"));
+            if (string.IsNullOrWhiteSpace(errorMessage)) errorMessage = exception.Message;
+
+            await paymentWebhookService.RecordInvalidAsync(
+                rawPayload,
+                errorMessage,
+                request.TransactionId,
+                request.ContractId,
+                cancellationToken);
+
+            return BadRequest(new
+            {
+                title = "Validation failed",
+                status = 400,
+                errors = exception.Errors
+                    .GroupBy(error => error.PropertyName)
+                    .ToDictionary(group => group.Key, group => group.Select(error => error.ErrorMessage).ToArray())
+            });
+        }
     }
 }
